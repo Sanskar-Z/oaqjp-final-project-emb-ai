@@ -1,12 +1,28 @@
-let RunSentimentAnalysis = ()=>{
-    textToAnalyze = document.getElementById("textToAnalyze").value;
+async function RunSentimentAnalysis() {
+    const text = document.getElementById("textToAnalyze").value.trim();
+    const output = document.getElementById("system_response");
 
-    let xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("system_response").innerHTML = xhttp.responseText;
+    if (!text) {
+        output.textContent = "Invalid input! Please enter some text to analyze.";
+        return;
+    }
+
+    output.textContent = "Analyzing...";
+
+    try {
+        const response = await fetch(
+            "/emotionDetector?textToAnalyze=" + encodeURIComponent(text)
+        );
+
+        const result = await response.text();
+
+        if (!response.ok) {
+            output.textContent = result;
+            return;
         }
-    };
-    xhttp.open("GET", "emotionDetector?textToAnalyze"+"="+textToAnalyze, true);
-    xhttp.send();
+
+        output.textContent = result;
+    } catch (error) {
+        output.textContent = "Unable to connect to the emotion detection server.";
+    }
 }
