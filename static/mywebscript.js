@@ -1,28 +1,35 @@
-async function RunSentimentAnalysis() {
-    const text = document.getElementById("textToAnalyze").value.trim();
-    const output = document.getElementById("system_response");
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("textToAnalyze");
+    const button = document.getElementById("analyzeButton");
+    const result = document.getElementById("result");
 
-    if (!text) {
-        output.textContent = "Invalid input! Please enter some text to analyze.";
-        return;
-    }
+    button.addEventListener("click", async function () {
+        const text = input.value.trim();
 
-    output.textContent = "Analyzing...";
-
-    try {
-        const response = await fetch(
-            "/emotionDetector?textToAnalyze=" + encodeURIComponent(text)
-        );
-
-        const result = await response.text();
-
-        if (!response.ok) {
-            output.textContent = result;
+        if (!text) {
+            result.textContent = "Invalid text! Please try again!";
             return;
         }
 
-        output.textContent = result;
-    } catch (error) {
-        output.textContent = "Unable to connect to the emotion detection server.";
-    }
-}
+        result.textContent = "Analyzing...";
+
+        try {
+            const response = await fetch("/emotionDetector", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    textToAnalyze: text
+                })
+            });
+
+            const message = await response.text();
+            result.textContent = message;
+
+        } catch (error) {
+            result.textContent =
+                "Unable to connect to the server. Please try again.";
+        }
+    });
+});
